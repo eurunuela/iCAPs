@@ -1,0 +1,11 @@
+MEX = mex
+
+EXE = Temporal_TA_MEX
+
+all: $(MEX1).mexa64 
+
+$(MEX1).mexa64:
+	$(MEX) -output $(EXE) $(EXE).c filter_boundary_MEX.c filter_MEX.c reverse_vector.c daubechies_6d.c
+
+clean:
+	rm -v $(EXE).mexa64

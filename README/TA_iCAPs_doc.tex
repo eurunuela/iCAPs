@@ -1,0 +1,344 @@
+\documentclass{article}
+
+
+\usepackage[margin=2cm]{geometry}
+\usepackage{enumitem}
+
+\usepackage{lineno,hyperref}
+\usepackage{float}
+\usepackage[utf8]{inputenc}
+\usepackage{verbatim}
+
+%\usepackage{cite}
+
+\modulolinenumbers[5]
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%% bibliography styles
+%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{apalike}
+
+%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%
+% my packages
+%%%%%%%%%%%%
+
+\usepackage{pdfpages}
+\usepackage{multirow}
+
+
+% todonotes
+\usepackage[textwidth=1.5cm,color=orange!20]{todonotes}
+% Allows notes and figure placeholders in document
+
+%\usepackage[disable,textwidth=1.5cm,color=orange!20]{todonotes} % to disable todonotes, uncomment this
+
+\newcommand{\insertref}[1]{\todo[color=green!40]{#1}}
+\newcommand{\insertrefinline}[1]{\todo[inline,color=green!40]{#1}}
+\newcommand{\note}[2][]{\todo[inline,color=orange!20,  caption={2do}, #1]{\begin{minipage}{\textwidth-4pt}#2\end{minipage}}}
+\newcommand{\add}[1]{\todo[color=red!40]{#1}}
+\newcommand{\addinline}[1]{\todo[inline,color=red!40]{#1}}
+\newcommand{\tb}[2][]{\todo[inline,color=blue!20,  caption={2do}, #1]{(Thomas)\\\begin{minipage}{\textwidth-4pt}#2\end{minipage}}}
+\newcommand{\dvdv}[2][]{\todo[inline,color=blue!20, bordercolor=red,  caption={2do}, #1]{(Dimitri)\\\begin{minipage}{\textwidth-4pt}#2\end{minipage}}}
+\newcommand{\dz}[2][]{\todo[inline,color=green!20,  caption={2do}, #1]{(Dani)\\\begin{minipage}{\textwidth-4pt}#2\end{minipage}}}
+\newcommand{\isik}[1]{{\color{red} {#1}}}
+
+\newcommand{\resp}[1]{{\color{teal}{#1} \\\\}}
+\newcommand{\rev}[1]{\textit{#1}\\\\}
+
+
+% SI units
+\usepackage{siunitx}
+
+% color package for highlighting\\
+\usepackage{color,soul}
+
+
+\graphicspath{{Pictures/}} % Specifies the directory where pictures are stored
+
+%\hypersetup{colorlinks=false}
+
+% set wordcount options
+\newcommand{\texcountinc}{%
+  \immediate\write18{texcount -inc \jobname.tex > \jobname.wcdetail }%
+  \verbatiminput{\jobname.wcdetail}%
+}
+
+% for math stuff
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[linesnumbered, ruled]{algorithm2e}
+\SetKwRepeat{Do}{do}{while}
+
+% for figures
+\graphicspath{{Pictures/}} % Specifies the directory where pictures are stored
+
+% for tables
+\usepackage{cellspace}
+\setlength\cellspacetoplimit{4pt}
+\setlength\cellspacebottomlimit{3pt}
+
+
+%%%%%%%%%%%%%%%
+\begin{document}
+
+% word counts:
+%\texcountinc
+
+% title:
+\title{Total Activation and iCAPs Toolbox}
+\author{Version 1.0\\Daniela Zöller, (\href{daniela.zoller@epfl.ch}{daniela.zoller@epfl.ch})}
+\date{\today}
+
+\maketitle
+
+\tableofcontents
+
+
+\section{License}
+This toolbox is shared under \href{https://opensource.org/licenses/gpl-3.0}{GPLv3} License. %\href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{CC BY-NC-SA License}.
+
+\section{Introduction}
+This document gives a step by step guide on how to use the total activation (TA) and innovation-driven coactivation patters (iCAPs) toolbox. Theory and background of the algorithms can be found in \cite{Karahanoglu2011,Karahanoglu2013,Karahanoglu2015,Farouj2017,Zoller2018}.\\
+Main functionalities of the toolbox include:
+\begin{itemize}
+\item Total activation for regularized deconvolution of fMRI data
+\item Thresholding of innovation frames based on surrogate data
+\item Clustering of innovation frames to extract spatial brain activity patterns
+\item Spatio-temporal regression for time course recovery of networks
+\end{itemize}
+
+For each step, there exists a script ``main\_[stepname]", which first calls a script ``Inputs\_[stepname]" to specify the parameters and then the function ``Run\_[stepname]" to execute the selected step according to the specified parameters. In general, all parameters are saved in a matlab struct variable called "param".
+
+\section{Example data}
+The toolbox includes scripts and results for an example resting-state fMRI dataset. The example data was obtained from the OpenfMRI database (\href{https://openfmri.org/dataset/ds000030/)}{https://openfmri.org/dataset/ds000030/})) \cite{Poldrack2016} and preprocessed using Statistical Parametric Mapping (SPM12, Wellcome Trust Centre for Neuroimaging, London, UK: \href{http://www.fil.ion.ucl.ac.uk/spm/)}{http://www.fil.ion.ucl.ac.uk/spm/}). Initial preprocessing steps included realignment, spatial smoothing with an isotropic Gaussian kernel of \SI{6}{\milli\meter} full-width half-maximum, co-registration of structural scans to the functional mean and segmentation with the SPM12 \textit{Segmentation} algorithm \cite{Ashburner2005}. Further motion correction steps are included in the total activation pipeline.
+
+Look at the example main and input scripts to see how to run the complete pipeline on the example fMRI data of two subjects. Note that the results are not stable for this few data, the example only exists to demonstrate how input and output data is saved. Resulting iCAPs and time courses are very noisy and unstable because there is not enough input data for the clustering. For stable results, more subjects or longer runs would be necessary!
+
+
+\section{Total Activation}
+This sub-routine of the toolbox reads input fMRI data, conducts preprocessing steps for motion correction according to the options specified by the user and saves the results for every subject in a subdirectory ``TA\_results/$<$title of project$>$" in every subject's folder. After execution on the TA pipeline, this folder will contain the  following subfolders:
+\begin{itemize}
+\item \textit{inputData}: contains preprocessed input data
+\item \textit{Total Activation}: contains results of total activation on real data
+\item \textit{Surrogate}: containts results of total activation on surrogate data
+\end{itemize}
+
+\subsection{Data Input and Preprocessing Options}
+Have a look at the file \textit{Inputs\_TA\_Data.m} for the required inputs related to fMRI data reading and preprocessing. If you don't want to do any motion correction (possibly if you have done it already beforehand), set the fields \textit{doDetrend}, \textit{doScrubbing} to 0.
+
+\subsection{TA-related Options}
+Have a look at the script \textit{Inputs\_TA.m} for the list and explanation for all parameters related to total activation.
+
+
+\section{Thresholding}
+This sub-routine applies a two step thresholding procedure to determine, which innovation frames (in Total Activation/Innovations.nii) contain significant transients. After execution of the Thresholding procedure, the following folder will be created in each subject's ``TA\_results/$<$title of project$>$" subfolder:
+\begin{itemize}
+\item \textit{Thresholding}: contains results from thresholding. A subfolder is created for each set of thresholding options.
+\end{itemize}
+
+\subsection{Thresholding-related Options}
+Have a look at the file \textit{Inputs\_Thresholding\_Data.m} for the required inputs related to reading of TA results files. In \textit{Inputs\_Thresholding.m} all options for thresholding are provided and explained.
+
+
+\section{Clustering}
+\color{red}
+Attention!\\
+For clustering, all subjects must be normalized to the same space. If you have run TA/thresholding in the subject-specific space, you need to normalize the thresholded innovation frames to MNI before continuing!\\
+Tip: create a separate folder with the normalized files in ``TA\_results/$<$title of project$>$\_MNI" and save the normalized data in it with the correct structure (i.e., in a subfolder called ``TotalActivation"). Like that you can simply change the \textit{param.title} to read the normalized files. In \textit{example\_normalization.m} there is an example for the normalization of required files and updating of \textit{param} for clustering.\\\\
+\color{black}
+%
+\subsection{Aggregating data}
+The clustering routine first reads and concatenates TA and thresholding results of all subjects. Concatenated files will be saved in a folder ``iCAPs\_results/$<$title of project$>$\_$<$thresholding specifications$>$". The following clustering input files will be saved:
+\begin{itemize}
+\item \textit{final\_mask} (.mat and .nii): the final mask of voxels with data in all subjects (see clustering options for the options to create this mask, by default it will be the intersection between all subjects' grey matter masks)
+\item \textit{AI} ($N_{timepoints} \times N_{voxels}$): concatenated activity inducing signals of all subjects
+\item \textit{AI\_subject\_labels} ($N_{timepoints} \times 1$): subject assignment of each row in \textit{AI}
+\item \textit{I\_sig} ($N_{significant\_innovations} \times N_{voxels}$): Concatenated significant innovations for all subject. Positive and negative innovations are split into separate frames. $N_{significant\_innovations}=N_{significant\_positive\_innovations} + N_{significant\_negative\_innovations}$. See \cite{Karahanoglu2015} for more details.
+\item \textit{subject\_labels} ($N_{significant_innovations} \times 1$): subject assignment for each row of \textit{I\_sig}.
+\item \textit{time\_labels} ($N_{significant_innovations} \times 1$): time point assignment for each row of \textit{I\_sig}.
+\end{itemize}
+
+\subsection{Clustering}
+After aggregating data from all subjects, clustering will be applied to significant innovation frames \textit{I\_sig}. Clustering results will be stored in a subfolder named according to the specific clustering options. The following outputs will be created by this part of the routine:
+\begin{itemize}
+\item \textit{iCAPs} (.mat and .nii): cluster centers of all resulting clusters, these are the spatial iCAPs maps
+\item \textit{iCAPs\_z} (.mat and .nii): z-scored cluster centers
+\item \textit{dist\_to\_centroid} ($N_{significant\_innovations} \times N_{clusters}$): distances from every clustered innovation frame to each cluster center
+\item \textit{IDX}  ($N_{significant\_innovations} \times N1$): for each frame the index of the cluster it is assigned to
+\item \textit{param}: structure containing all input parameters, which lead to these results
+\end{itemize}
+
+\subsection{Consensus Clustering}
+If requested according to the options, consensus clustering \cite{Monti2003} is applied to evaluate cluster stability and fid the best number of clusters to consider. After the routine, consensus matrices for each requested cluster number will be saved is a consensus clustering subfolder, as well as CDF and AUC of values in the consensus matrices. These files can then be used according to \cite{Monti2003} to decide on the best number of clusters.
+
+\subsection{Cluster Consensus}
+If clustering and consensus clustering has been done, the consensus of every cluster can be computed as the average consensus index between all pairs of frames belonging to the same cluster. Values range from 1 (all frames are always clustered together across resamples) to 0 (frames are never being clustered together). Higher values indicate higher stability of the cluster \cite{Monti2003}. 
+
+\subsection{Clustering-related Options}
+Have a look at the file \textit{Inputs\_Clustering\_Data.m} for the required inputs related to reading of TA and Thresholding results files. In \textit{Inputs\_Clustering.m} all options for clustering are provided and explained.
+
+
+\section{Time Courses}
+As the iCAPs' spatial maps are retrieved from significant innovations, time courses have to be extracted by backprojection to the activity inducing signals. In this routine, one can choose to apply transient-informed or unconstrained regression for time course retrieval.
+
+\subsection{Time courses-related Options}
+Have a look at the file \textit{Inputs\_TimeCourses\_Data.m} for the required inputs related to reading of Clustering results files. In \textit{Inputs\_TimeCourses.m} all options for time course retrieval are provided and explained.
+
+\subsection{Transient-informed regression}
+If time courses are extracted by transient-informed regression \cite{Zoller2018}, a subfolder will be created in the corresponding clustering folder. It will contain the following files:
+\begin{itemize}
+\item {\textit{Results for all requested soft assignment factors (see options):}
+	\begin{itemize}
+	\item \textit{TC}: cell array with time courses of every subject
+	\item \textit{TC\_stats}: statistics of data fite (BIC, AIC, ...)
+	\item \textit{tempChar}: cell array with temporal characteristics (duration, coactivations, ...) for every subject's time courses
+	\end{itemize}}
+\item {\textit{Files related to selection of best soft assignment factor:}
+	\begin{itemize}
+	\item \textit{BICsum}: sum of BIC across all subject, knee point marked in red
+	\item \textit{BICdist}: distribution of BIC across all subject, knee point marked in red
+	\item \textit{AICsum}: sum of AIC across all subject, knee point marked in red
+	\item \textit{AICdist}: distribution of AIC across all subject, knee point marked in red
+	\end{itemize}}
+\end{itemize}
+Results for the best soft assignment factor according to BIC will be saved in main iCAPs directory, it will contain the files: \textit{TC} (time courses), \textit{TC\_stats} (statistics: BIC/AIC etc.) and \textit{tempChar} (temporal characteristics).
+\\\\
+Computed temporal characteristics are:
+\begin{itemize}
+	\item \textit{nTP\_sub}: total number of time points per subject
+	\item \textit{innov\_counts\_total / innov\_counts\_perc}: total number / percentage of significant innovation frames
+	\item \textit{innov\_counts (\_percOfInnov)}: number of innovations in each iCAP (percentage of total number of significant innovations)
+	\item \textit{TC\_norm\_thes}: z-scored and thresholded time courses
+	\item \textit{TC\_active}: binarized time courses (+1/0/-1 for positive/none/negative activation)
+	\item \textit{coactiveiCAPs\_total}: number of co-active iCAPs per time point
+	\item \textit{occurrences (\_pos/\_neg)}: number of activation blocks (positive/negative activations)
+	\item \textit{duration\_total\_counts (\_pos/\_neg)}: total number of active time points (positive/negative activations)
+	\item \textit{duration\_avg\_counts (\_pos/\_neg)}: average duration of every  (=occurrences/duration\_total\_counts)
+	\item \textit{coupling\_counts}: number of frames with co-activation for every pairwise combination of iCAPs
+	\item \textit{coupling\_jacc}: coupling Jaccard index (overlap divided by activation union)
+	\item \textit{coupling\_sameSign(\_diffSign)\_counts}: positive (negative) couplings
+	\item \textit{coupling\_sameSign(\_diffSign)\_jacc}: positive (negative) coupling Jaccard index
+\end{itemize}
+For the computation of duration and couplings, only activation blocks of 2 timepoints or more have been considered
+
+
+\subsection{Unconstrained regression}
+We do not recommend this option, but provide the possibility to compare with \cite{Karahanoglu2015,Bolton2018}
+If time courses are extracted by unconstrained regression, a subfolder ``TCs\_unconstrained" will be created in the corresponding clustering folder. It will contain the following files:
+\begin{itemize}
+	\item \textit{TC\_unc}: cell array with time courses of every subject
+	\item \textit{TC\_unc\_stats}: statistics of data fit (BIC, AIC, ...)
+	\item \textit{tempChar\_unc}: cell array with temporal characteristics (duration, couplings, ...) for every subject's time courses
+\end{itemize}
+
+
+
+
+%\subsubsection{PathData}
+%Path to where the input data is saved.
+%
+%\subsubsection{TR}
+%TR of the input fMRI data.
+%
+%\subsubsection{Subjects}
+%Cell array with list of subdirectories where each subject's fMRI data is stored; must contain one entry per subject to analyze. This is where the TA folder will be created (or looked for) for each subject.
+%
+%\subsubsection{n\_subjects}
+%Number of subject to analyze. This is the length of the cell array \textit{Subjects}.
+%
+%\subsubsection{title}
+%If TA should be run multiple times for different parameters it may be useful to define a title of the current project. If it is not specified, the current date will be used as title.
+%
+%
+%\subsubsection{Folder\_functional}
+%Name of the functional subfolder; [] if data is directly lying in the Path; can be a cell with subfolder for each subject, or a simple string if the subfolder is the same for all subjects.
+%
+%\subsubsection{TA\_func\_prefix}
+%String with the prefix for functional data to read. Can be a cell with prefix for each subject, or a simple string if the subfolder is the same for all subjects.
+%
+%\subsubsection{Folder\_GM} 
+%Name of the folder with the probabilistic gray matter map; [] if data is directly lying in the Path; Can be a cell with subfolder for each subject, or a simple string if the subfolder is the same for all subjects.
+%
+%\subsubsection{TA\_GM\_prefix} 
+%String with the prefix of the probabilistic map to read. Can be a cell with prefix for each subject, or a simple string if the subfolder is the same for all subjects.
+%
+%
+%\subsubsection{T\_gm}
+%Threshold at which to threshold the probabilistic gray matter map
+% (values larger than this only will be included in the mask); has to lie
+% between 0 and 1.
+% 
+% \subsubsection{is\_morpho}
+% \textit{Optional} - select if morphological operations (opening and closure) should be run on the GM mask to remove wholes
+% 
+% \subsubsection{n\_morpho\_voxels}
+%\textit{Optional} - If `is\_morpho' is true, specify the size (in voxels) for opening and closing operators
+%
+%
+%\subsubsection{skipped\_scans}
+%Number of fMRI scans to skip at the beginning.
+%
+%
+%\subsubsection{doDetrend}
+%Select if detrending should be run on the data, if set to 0 the fields `DCT\_TS' and `Covariates' do not need to be set.
+%
+%\subsubsection{DCT\_TS}
+%Detrending information: cut-off period for the DCT basis (for example, 128 means a cutoff of 1/128 = 0.0078 [Hz])
+%
+%\subsubsection{Covariates}
+%Detrending information: and covariates to add (should be provided each as a column of `Covariates')
+%
+%
+%\subsubsection{doScrubbing}
+%select if scrubbing should be run on the data, if 0 the fields
+% `Folder\_motion', `TA\_mot\_prefix', `skipped\_scans\_motionfile',
+% `FD\_method', `FD\_threshold' and `interType' do not need to be set
+% 
+%\subsubsection{Folder\_motion}
+%Folder where motion data from SPM realignment is stored, if motion data
+% is taken from another programm than SPM, a text file with the 6 motion
+% parameters (3 translational in mm + 3 rotational in rad) should be set as
+% input here.
+% 
+%\subsubsection{TA\_mot\_prefix}
+%String with the prefix of the motion file to read. Can be a cell with prefix for each subject, or a simple string if the subfolder is the same for all subjects.
+%
+%\subsubsection{skipped\_scans\_motionfile}
+%\textit{Optional} - Number of lines to ignore at the beginning of the motion file, if empty
+% or not set, this will be equal to `skipped\_scans'.
+% 
+%\subsubsection{FD\_method}
+%Motion information: type of method to use to quantify motion (for now, only 'Power' is implemented)
+%\subsubsection{FD\_threshold}
+%Motion information: threshold of displacement to use for each frame (in [mm])
+%\subsubsection{interType}
+%Interpolation method (i.e. `spline' or `linear', see interp1 for all  possibilities) - default (if []) is `spline'.
+
+
+
+
+
+
+%\subsubsection{force\_TA\_on\_real}
+%\textit{Optional} - if set to 1, TA on real data will be forced to run, even if already has been done. Otherwise, the pipeline checks if TA has already been executed and only runs it again if not.
+%
+%\subsubsection{force\_TA\_on\_surrogate}
+%\textit{Optional} - if set to 1, TA on surrogate data will be forced to run, even if already has been done. Otherwise, the pipeline checks if TA has already been executed and only runs it again if not.
+%
+%\subsubsection{HRF}
+%Type of assumed hemodynamic response function type (can be `bold' or `spmhrf').
+
+
+
+% bibliography
+%\section*{References}
+\newpage
+\bibliography{Mendeley}
+
+
+\end{document}
+

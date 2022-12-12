@@ -1,0 +1,137 @@
+Copyright (C) 2009-2016 Intel Corporation. All rights reserved.
+Intel(R) Advisor 2017 (build 501009)
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2016 The MathWorks, Inc.
+                   R2016a (9.0.0.341360) 64-bit (glnxa64)
+                             February 11, 2016
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+
+	Academic License
+
+                                                       
+*******************************************************
+**  DWT Extension Mode: Symmetrization (half-point)  **
+*******************************************************
+                                                       
+
+ans =
+
+    91   109    91   700
+
+EO. WARNING: truncate dataset  data + atlas!!
+
+param = 
+
+    numberofskippedscans: 500
+                File_EXT: 'nii'
+                 MAP_EXT: 'hdr'
+               surrogate: 0
+                     HRF: 'bold'
+                      TR: 0.7200
+                  DCT_TS: 128
+          LambdaTempCoef: 1.4826
+               COST_SAVE: 0
+                use_cuda: 1
+               Dimension: [20 20 20 700]
+
+Mean FD_Power 0.11, mean FD_VanDijk 0.015
+
+fid =
+
+     3
+
+Detrending the data... 
+Detrending method: DCT 
+Temporal Regularization for BLOCKS
+Spatial Regularization: Total-Variation_graph
+on iteration 1 / 2
+Launching MyTemporal_MEX
+Starting parallel pool (parpool) using the 'local' profile ... connected to 8 workers.
+Launching Spatial_TV_graph
+There are 8 workers in pool.
+Spatial_TV_graph completed in 507.99307
+MyTemporal_MEX completed in 534.02999
+on iteration 2 / 2
+Launching MyTemporal_MEX
+MyTemporal_MEX completed in 22.68971
+ 
+IT TOOK    557.47024 SECONDS FOR SPATIO_TEMPORAL REGULARIZATION OF  3482 TIMECOURSES; use GPU? 1; sum(sum(TC_OUT)) =      -349.6681339208
+Saving...
+DONE...
+Filename /home/orliac/bootstrap-brainnets/Total_Activation_SCITAS/HCP_105620_RL/rfMRI_REST1_RL/TCN_BLOCK_LamCoef15_TV_graph_Lam6_rfMRI_REST1_RL.nii already exists, overwriting... 
+Filename /home/orliac/bootstrap-brainnets/Total_Activation_SCITAS/HCP_105620_RL/rfMRI_REST1_RL/TC_OUT_BLOCK_LamCoef15_TV_graph_Lam6_rfMRI_REST1_RL.nii already exists, overwriting...
+Filename /home/orliac/bootstrap-brainnets/Total_Activation_SCITAS/HCP_105620_RL/rfMRI_REST1_RL/TC_D_OUT_BLOCK_LamCoef15_TV_graph_Lam6_rfMRI_REST1_RL.nii already exists, overwriting...
+Total run time:  570.38339
+>> 
+                            < M A T L A B (R) >
+                  Copyright 1984-2016 The MathWorks, Inc.
+                   R2016a (9.0.0.341360) 64-bit (glnxa64)
+                             February 11, 2016
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+
+	Academic License
+
+                                                       
+*******************************************************
+**  DWT Extension Mode: Symmetrization (half-point)  **
+*******************************************************
+                                                       
+
+ans =
+
+    91   109    91   700
+
+EO. WARNING: truncate dataset  data + atlas!!
+
+param = 
+
+    numberofskippedscans: 500
+                File_EXT: 'nii'
+                 MAP_EXT: 'hdr'
+               surrogate: 0
+                     HRF: 'bold'
+                      TR: 0.7200
+                  DCT_TS: 128
+          LambdaTempCoef: 1.4826
+               COST_SAVE: 0
+                use_cuda: 0
+               Dimension: [20 20 20 700]
+
+Mean FD_Power 0.11, mean FD_VanDijk 0.015
+
+fid =
+
+     3
+
+Detrending the data... 
+Detrending method: DCT 
+Temporal Regularization for BLOCKS
+Spatial Regularization: Total-Variation_graph
+on iteration 1 / 2
+Launching MyTemporal
+MyTemporal completed in 434.67521
+Launching Spatial_TV_graph
+Starting parallel pool (parpool) using the 'local' profile ... connected to 8 workers.
+There are 8 workers in pool.
+Spatial_TV_graph completed in 534.70577
+on iteration 2 / 2
+Launching MyTemporal
+MyTemporal completed in 513.46966
+ 
+IT TOOK   1483.33606 SECONDS FOR SPATIO_TEMPORAL REGULARIZATION OF  3482 TIMECOURSES; use GPU? 0; sum(sum(TC_OUT)) =      -349.6681339651
+Saving...
+DONE...
+Filename /home/orliac/bootstrap-brainnets/Total_Activation_SCITAS/HCP_105620_RL/rfMRI_REST1_RL/TCN_BLOCK_LamCoef15_TV_graph_Lam6_rfMRI_REST1_RL.nii already exists, overwriting... 
+Filename /home/orliac/bootstrap-brainnets/Total_Activation_SCITAS/HCP_105620_RL/rfMRI_REST1_RL/TC_OUT_BLOCK_LamCoef15_TV_graph_Lam6_rfMRI_REST1_RL.nii already exists, overwriting...
+Filename /home/orliac/bootstrap-brainnets/Total_Activation_SCITAS/HCP_105620_RL/rfMRI_REST1_RL/TC_D_OUT_BLOCK_LamCoef15_TV_graph_Lam6_rfMRI_REST1_RL.nii already exists, overwriting...
+Total run time: 1496.17573
+>> 
