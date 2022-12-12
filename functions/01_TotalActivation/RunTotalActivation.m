@@ -106,7 +106,7 @@ function [TC_OUT,param] = RunTotalActivation(TCN,param)
             if (param.use_pfm==1)
                 fprintf('Launching Paradigm Free Mapping\n');
                 tmt = toc;
-                [temp, param] = PFM(TC_IN, param);
+                [temp, param] = PFM_temporal(TC_IN, param);
                 fprintf('PFM completed in %.5f\n', toc-tmt);
             else
                 if (param.use_cuda==0)
