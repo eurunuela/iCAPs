@@ -10,14 +10,19 @@
 %
 % Implemented by Eneko Uruñuela, 13.12.2022
 
-function [X_hrf_norm] = GenerateHRF(tr, nscans, block)
+function [X_hrf_norm] = GenerateHRF(tr, nscans, block, custom)
 
 temp = [];
 tempTE = [];
 
-[hrf_SPM,~] = spm_hrf(tr);
-max_hrf = max(hrf_SPM);
-hrf_SPM(length(hrf_SPM+1):nscans) = 0;
+% If custom is a string, it will be used as the name of the file containing the custom HRF
+if ischar(custom)
+    hrf = readmatrix(custom);
+else
+    [hrf,~] = spm_hrf(tr);
+end
+max_hrf = max(hrf);
+hrf_SPM(length(hrf+1):nscans) = 0;
 
 temp = hrf_SPM;
 

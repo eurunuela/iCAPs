@@ -28,7 +28,7 @@ function [TC_OUT, param] = PFM_temporal(TCN, param)
     param.LambdaTemp = zeros(param.NbrVoxels,1);
 
     % Generate HRF
-    param.HRF = GenerateHRF(param.TR, param.Dimension(4), param.block)
+    param.HRF = GenerateHRF(param.TR, param.Dimension(4), param.block, param.custom)
 
     % We loop over all voxels
     for i = 1:param.NbrVoxels
