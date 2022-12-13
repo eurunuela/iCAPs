@@ -122,6 +122,14 @@ function [x,ParametersOut] = TA_Temporal_OneTimeCourse(y,idx_vox,ParametersIn)
     % When we exit the algorithm, we can use our converged dual variable
     % estimate to get an estimate of the primal variable (our x)
     x = X_tilde*z;
+    
+    if params.block == 1
+        ParametersOut.Innovation = z;
+        ParametersOut.Activity_inducing = tril(ones(nscans)) * z;
+    else
+        ParametersOut.Innovation = 0;
+        ParametersOut.Activity_inducing = z;
+    end
 
     % ParametersOut.NoiseEstimateIn = noise_estimate;
 

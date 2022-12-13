@@ -17,7 +17,7 @@
 % for each voxel), 'NoiseEstimateFin' (final noise estimate for each voxel)
 %
 % Implemented by Eneko Uruñuela, 13.12.2022
-function [TC_OUT, param] = PFM_temporal(TCN, param)
+function [TC_OUT, paramOUT] = PFM_temporal(TCN, param)
 
     % The output from the algorithm (time x voxels) is initialized as
     % a matrix of zeros
