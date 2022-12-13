@@ -1,3 +1,22 @@
+%% This function performs the temporal regularization part of total 
+% activation, voxel after voxel
+%
+% Inputs:
+% - TCN is the n_time_points x n_ret_voxels 2D matrix of data input to the
+% regularization
+% - param is a structure containing all TA-relevant parameters; here, we
+% will need the fields 'Dimension' (X, Y, Z and T sizes), 'NbrVoxels'
+% (number of voxels to consider for regularization), 'LambdaTempCoef' (used
+% to compute regularization coefficients)
+%
+% Outputs:
+% - TC_OUT is the n_time_points x n_ret_voxels 2D matrix of outputs from
+% the regularization step
+% - param is the updated structure with relevant parameters for TA; added
+% fields are 'LambdaTempFin' (vector with final regularization estimates
+% for each voxel), 'NoiseEstimateFin' (final noise estimate for each voxel)
+%
+% Implemented by Eneko Uruñuela, 13.12.2022
 function [TC_OUT, param] = PFM_temporal(TCN, param)
 
     % The output from the algorithm (time x voxels) is initialized as
@@ -7,6 +26,9 @@ function [TC_OUT, param] = PFM_temporal(TCN, param)
     % LambdaTemp contains the values of regularisation parameters for each
     % voxel; also set to zero for now
     param.LambdaTemp = zeros(param.NbrVoxels,1);
+
+    % Generate HRF
+    param.HRF = GenerateHRF(param.TR, param.Dimension(4), param.block)
 
     % We loop over all voxels
     for i = 1:param.NbrVoxels
@@ -35,21 +57,18 @@ function [TC_OUT, param] = PFM_temporal(TCN, param)
             % This is thus going to be our estimate of the noise level
             % for the considered voxel time course
             param.LambdaTemp(i) = mad(coef,1)*param.LambdaTempCoef;
+
+             % Now that we have estimated our initial lambda 
+            % (regularisation parameter), Temporal_TA performs the 
+            % computations themselves for the considered time course
+            % TCN(i,:) of voxel i
+
+            [TC_OUT(:,i),paramOUT] = PFM_Temporal_OneTimeCourse(TCN(:,i),i,param);
         
         % If LambdaPFM is "aic" or "bic", use PFM with LARS
-        elseif strcmp(param.LambdaPFM,'aic') || strcmp(param.LambdaPFM,'bic')
-            
-            % We use the PFM_LARS function to estimate the
-            % time course of the voxel of interest
-            [TC_OUT(:,i), param.LambdaTemp(i)] = PFM_LARS(TCN(:,i),param);
-
-        % Else, use the universal threshold by default
-        else
-            
-            % We use the PFM_universal function to estimate the
-            % time course of the voxel of interest
-            [TC_OUT(:,i), param.LambdaTemp(i)] = PFM_universal(TCN(:,i),param);
-            
+        else strcmp(param.LambdaPFM,'aic') || strcmp(param.LambdaPFM,'bic')
+            % Error message saying that this is not implemented yet
+            error('PFM with LARS is not implemented yet')
         end
 
 
