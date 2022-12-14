@@ -17,7 +17,7 @@
 % for each voxel), 'NoiseEstimateFin' (final noise estimate for each voxel)
 %
 % Implemented by Eneko Uruñuela, 13.12.2022
-function [TC_OUT, paramOUT] = PFM_temporal(TCN, param)
+function [TC_OUT, paramOUT] = MyTemporal_pfm(TCN, param)
 
     % The output from the algorithm (time x voxels) is initialized as
     % a matrix of zeros
@@ -29,6 +29,12 @@ function [TC_OUT, paramOUT] = PFM_temporal(TCN, param)
 
     % Generate HRF
     param.HRF = GenerateHRF(param.TR, param.Dimension(4), param.block, param.custom)
+
+    % The necessary HRF matrices are computed
+    param.X_tilde = param.HRF;
+    param.X_tilde_trans = param.X_tilde';
+    param.X_tilde_tt = param.X_tilde_trans*param.X_tilde;
+    param.c_ist = 1/abs(eigs(param.X_tilde_tt,1));
 
     % We loop over all voxels
     for i = 1:param.NbrVoxels

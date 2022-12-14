@@ -15,9 +15,9 @@ function [x,ParametersOut] = TA_Temporal_OneTimeCourse(y,idx_vox,ParametersIn)
 
     % The necessary HRF matrices are computed
     X_tilde = param.HRF;
-    X_tilde_trans = X_tilde';
-    X_tilde_tt = X_tilde_trans*X_tilde;
-    c_ist = 1/abs(eigs(X_tilde_tt,1));
+    X_tilde_trans = param.X_tilde_trans;
+    X_tilde_tt = param.X_tilde_tt;
+    c_ist = param.c_ist
 
     %% Initialization of the HRF by data matrix multiplication
     v = X_tilde_trans*y;
