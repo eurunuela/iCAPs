@@ -234,7 +234,12 @@ function [] = Run_TA(param)
                 
                 % TA has been run, so now we can derive the activity-inducing and 
                 % innovation signals from the activity related signal
-                [Innovation,Activity_inducing] = Generate_Innovations(Activity_related,param);
+                if param.use_PFM == 1
+                    Innovation = param.Innovation;
+                    Activity_inducing = param.Activity_inducing;
+                else
+                    [Innovation,Activity_inducing] = Generate_Innovations(Activity_related,param);
+                end
                 
                 % Saving results from real data
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -275,7 +280,12 @@ function [] = Run_TA(param)
                 
                 % TA has been run, so now we can derive the activity-inducing and 
                 % innovation signals from the activity related signal
-                [Innovation_surrogate,Activity_inducing_surrogate] = Generate_Innovations(Activity_related_surrogate,param);
+                if param.use_PFM == 1
+                    Innovation_surrogate = param.Innovation;
+                    Activity_inducing_surrogate = param.Activity_inducing;
+                else
+                    [Innovation_surrogate,Activity_inducing_surrogate] = Generate_Innovations(Activity_related_surrogate,param);
+                end
 
                 % Saving results from Surrogates
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
