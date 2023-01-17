@@ -22,12 +22,12 @@ else
     [hrf,~] = spm_hrf(tr);
 end
 max_hrf = max(hrf);
-hrf_SPM(length(hrf+1):nscans) = 0;
+hrf(length(hrf+1):nscans) = 0;
 
-temp = hrf_SPM;
+temp = hrf;
 
 for j = 1 : nscans-1 % Appends hrf into matrix moving it down by a position on each iteration
-    foo = [zeros(j,1); hrf_SPM(1:(end-j))];
+    foo = [zeros(j,1); hrf(1:(end-j))];
     temp = [temp foo];
 end
 
