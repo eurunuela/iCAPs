@@ -106,8 +106,12 @@ function [TC_OUT,param] = RunTotalActivation(TCN,param)
             if (param.use_pfm==1)
                 fprintf('Launching MyTemporal with Paradigm Free Mapping\n');
                 tmt = toc;
-                [temp, param] = MyTemporal_pfm(TC_IN, param);
+                [temp,Activity_inducing,innovation, param] = MyTemporal_pfm(TC_IN, param);
                 fprintf('PFM completed in %.5f\n', toc-tmt);
+                if (k==param.Nit)
+                    param.Activity_inducing=Activity_inducing;
+                    param.innovation=Innovation;
+                end
             else
                 if (param.use_cuda==0)
                     fprintf('Launching MyTemporal with Total Activation\n');
