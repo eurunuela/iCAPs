@@ -10,25 +10,26 @@
 % to compute regularization coefficients)
 %
 % Outputs:
-% - TC_OUT is the n_time_points x n_ret_voxels 2D matrix of outputs from
+% - Activity_related is the n_time_points x n_ret_voxels 2D matrix of outputs from
 % the regularization step
 % - param is the updated structure with relevant parameters for TA; added
 % fields are 'LambdaTempFin' (vector with final regularization estimates
 % for each voxel), 'NoiseEstimateFin' (final noise estimate for each voxel)
 %
 % Implemented by Eneko Uruñuela, 13.12.2022
-function [TC_OUT, paramOUT] = MyTemporal_pfm(TCN, param)
+function [Activity_related,Activity_inducing,innovation, paramOUT] = MyTemporal_pfm(TCN, param)
 
     % The output from the algorithm (time x voxels) is initialized as
     % a matrix of zeros
-    TC_OUT = zeros(param.Dimension(4),param.NbrVoxels);
-
+    Activity_related = zeros(param.Dimension(4),param.NbrVoxels);
+    Activity_inducing = zeros(param.Dimension(4),param.NbrVoxels);
+    innovation = zeros(param.Dimension(4),param.NbrVoxels);
     % LambdaTemp contains the values of regularisation parameters for each
     % voxel; also set to zero for now
     param.LambdaTemp = zeros(param.NbrVoxels,1);
 
     % Generate HRF
-    param.HRF = GenerateHRF(param.TR, param.Dimension(4), param.block, param.custom)
+    param.HRF = GenerateHRF(param.TR, param.Dimension(4), param.block, param.custom);
 
     % The necessary HRF matrices are computed
     param.X_tilde = param.HRF;
@@ -69,7 +70,7 @@ function [TC_OUT, paramOUT] = MyTemporal_pfm(TCN, param)
             % computations themselves for the considered time course
             % TCN(i,:) of voxel i
 
-            [TC_OUT(:,i),paramOUT] = PFM_Temporal_OneTimeCourse(TCN(:,i),i,param);
+            [Activity_related(:,i),Activity_inducing(:,i),innovation(:,i),paramOUT] = PFM_Temporal_OneTimeCourse(TCN(:,i),i,param);
         
         % If LambdaPFM is "aic" or "bic", use PFM with LARS
         else strcmp(param.LambdaPFM,'aic') || strcmp(param.LambdaPFM,'bic')
@@ -79,5 +80,4 @@ function [TC_OUT, paramOUT] = MyTemporal_pfm(TCN, param)
 
 
     end
-
 end
