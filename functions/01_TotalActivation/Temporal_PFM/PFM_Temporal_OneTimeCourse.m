@@ -11,14 +11,14 @@
 % - ParametersOut: structure containing the parameters of the algorithm
 %
 % Implemented by Eneko Uruñuela, 13.12.2022
-function [x,ParametersOut] = TA_Temporal_OneTimeCourse(y,idx_vox,ParametersIn)
+function [Activity_related,Activity_inducing,Innovation,ParametersOut] = TA_Temporal_OneTimeCourse(y,idx_vox,ParametersIn)
 
     % The necessary HRF matrices are computed
-    X_tilde = param.HRF;
-    X_tilde_trans = param.X_tilde_trans;
-    X_tilde_tt = param.X_tilde_tt;
-    c_ist = param.c_ist
-
+    ParametersOut = ParametersIn;
+    X_tilde = ParametersIn.HRF;
+    X_tilde_trans = ParametersIn.X_tilde_trans;
+    X_tilde_tt = ParametersIn.X_tilde_tt;
+    c_ist = ParametersIn.c_ist;
     %% Initialization of the HRF by data matrix multiplication
     v = X_tilde_trans*y;
 
@@ -79,7 +79,7 @@ function [x,ParametersOut] = TA_Temporal_OneTimeCourse(y,idx_vox,ParametersIn)
         z_l = z;
 
         % Forward step
-        z_ista = s + c_ist * (v - X_tilde_tt * s)
+        z_ista = s + c_ist * (v - X_tilde_tt * s);
 
         % Backward step
         z = proximal_operator_lasso(z_ista, lambda * c_ist);
@@ -121,14 +121,14 @@ function [x,ParametersOut] = TA_Temporal_OneTimeCourse(y,idx_vox,ParametersIn)
 
     % When we exit the algorithm, we can use our converged dual variable
     % estimate to get an estimate of the primal variable (our x)
-    x = X_tilde*z;
+    Activity_related = X_tilde*z;
     
-    if params.block == 1
-        ParametersOut.Innovation = z;
-        ParametersOut.Activity_inducing = tril(ones(nscans)) * z;
+    if ParametersIn.block == 1
+       Innovation = z;
+       Activity_inducing = tril(ones(N)) * z;
     else
-        ParametersOut.Innovation = 0;
-        ParametersOut.Activity_inducing = z;
+       Innovation = 0;
+       Activity_inducing = z;
     end
 
     % ParametersOut.NoiseEstimateIn = noise_estimate;
