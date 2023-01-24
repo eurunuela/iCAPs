@@ -40,15 +40,14 @@ function [TC_OUT,param] = MyTemporal(TCN,param)
 	%EO: Use parfor = 1 to trigger parallel MEX execution
 	%        parfor = 0 to default implementation
 	%----------------------------------------------------
-	use_parfor = 1
 
-	if(isempty(gcp('nocreate')) && use_parfor)
+	if(isempty(gcp('nocreate')) && param.use_parfor)
 	    parpool(24)
 	end
 
 	Nbr = param.NbrVoxels;
 
-        if (use_parfor==1)
+        if (param.use_parfor==1)
 	  
 	  LambdaTemp    = zeros(param.NbrVoxels,1);
           LambdaTempFin = zeros(param.NbrVoxels,1);
@@ -119,7 +118,7 @@ function [TC_OUT,param] = MyTemporal(TCN,param)
             param.LambdaTemp(i) = mad(coef,1)*param.LambdaTempCoef;
             param.VxlInd        = i;
 
-            [TC_OUT(:,i),paramOUT] = Temporal_TA(TCN(:,i),param);
+            [TC_OUT(:,i),paramOUT] = TA_Temporal(TCN(:,i),param);
 
             param.LambdaTempFin(i)    = paramOUT.LambdasTempFin;
             param.NoiseEstimateFin(i) = paramOUT.NoiseEstimateFin;
