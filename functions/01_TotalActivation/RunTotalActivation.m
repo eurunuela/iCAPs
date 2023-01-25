@@ -111,7 +111,7 @@ function [TC_OUT,param] = RunTotalActivation(TCN,param)
                 fprintf('PFM completed in %.5f\n', toc-tmt);
                 if (k==param.Nit)
                     param.Activity_inducing=Activity_inducing;
-                    param.innovation=Innovation;
+                    param.Innovation=Innovation;
                 end
             else
                 if (param.use_cuda==0)
