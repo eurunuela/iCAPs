@@ -7,7 +7,9 @@
 % - ParametersIn - structure containing the parameters of the algorithm
 %
 % Outputs:
-% - x: result of denoising
+% - Activity_related: result of deconvolution
+% - Activity_inducing: result of deconvolution
+% - Innovation: result of deconvolution
 % - ParametersOut: structure containing the parameters of the algorithm
 %
 % Implemented by Eneko Uruñuela, 13.12.2022

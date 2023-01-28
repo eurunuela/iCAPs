@@ -12,6 +12,10 @@
 % Outputs:
 % - Activity_related is the n_time_points x n_ret_voxels 2D matrix of outputs from
 % the regularization step
+% - Activity_inducing is the n_time_points x n_ret_voxels 2D matrix of outputs from
+% the regularization step
+% - innovation is the n_time_points x n_ret_voxels 2D matrix of outputs from
+% the regularization step
 % - param is the updated structure with relevant parameters for TA; added
 % fields are 'LambdaTempFin' (vector with final regularization estimates
 % for each voxel), 'NoiseEstimateFin' (final noise estimate for each voxel)
