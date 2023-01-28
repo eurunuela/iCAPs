@@ -194,7 +194,6 @@ function [] = Run_TA(param)
             save4Dnii(resultsPath,'inputData','STD_MAP',STD_MAP,param.fHeader.fname,param.mask,param.Dimension);
             
             
-            
             % Total activation itself
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % The 'analyze' and 'reconstruct' filter cases are
@@ -234,7 +233,7 @@ function [] = Run_TA(param)
                 
                 % TA has been run, so now we can derive the activity-inducing and 
                 % innovation signals from the activity related signal
-                if param.use_PFM == 1
+                if param.use_pfm == 1
                     Innovation = param.Innovation;
                     Activity_inducing = param.Activity_inducing;
                 else
@@ -274,15 +273,15 @@ function [] = Run_TA(param)
                 % Running TA for Surrogates
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 tic;
-                Activity_related_surrogate = RunTotalActivation(Surrogate,param_tmp);
+                [Activity_related_surrogate,param_tmp] = RunTotalActivation(Surrogate,param_tmp);
                 param.time_surrogate = toc;
                 WriteInformation(fid,['It took ',num2str(param.time_surrogate),' seconds to run total activation on surrogate data...']);
                 
                 % TA has been run, so now we can derive the activity-inducing and 
                 % innovation signals from the activity related signal
-                if param.use_PFM == 1
-                    Innovation_surrogate = param.Innovation;
-                    Activity_inducing_surrogate = param.Activity_inducing;
+                if param.use_pfm == 1
+                    Innovation_surrogate = param_tmp.Innovation;
+                    Activity_inducing_surrogate = param_tmp.Activity_inducing;
                 else
                     [Innovation_surrogate,Activity_inducing_surrogate] = Generate_Innovations(Activity_related_surrogate,param);
                 end
