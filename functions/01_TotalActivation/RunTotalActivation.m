@@ -158,8 +158,8 @@ function [TC_OUT,param] = RunTotalActivation(TCN,param)
 
         % 3. WEIGHTED AVERAGE OF THE SOLUTIONS
         xT = xT + stepsize*(temp - TC_OUT); %update temporal, stepsize=1; xT = xT + stepsize*(temp - TC_OUT);
-            
-            TC_OUT = xT*param.weights(1)+param.weights(2)*xS;
+
+        TC_OUT = xT*param.weights(1)+param.weights(2)*xS;
         disp('Finished weighted averaging step...');
 
         k = k+1;
