@@ -85,60 +85,51 @@ function [TC_OUT,param] = RunTotalActivation(TCN,param)
             error('SIZE should have 4 dimensions.')
         end
 
-
-
-    
         %EO: store last estimate of noise
         noiseFin = zeros(param.NbrVoxels,1,'double');
 
-
-
-
-
         TC_IN = TC_OUT-xT+TCN;
 
-            temp = zeros(size(TC_OUT),'double');
-            
-            tmt = 0;
+        temp = zeros(size(TC_OUT),'double');
+        
+        tmt = 0;
 
-            % Use synthesis-based temporal regularization with Paradigm Free Mapping (PFM) if
-            % param.use_pfm==1, otherwise use the temporal regularization in Total Activation
-            if (param.use_pfm==1)
-                fprintf('Launching MyTemporal with Paradigm Free Mapping\n');
-                param.use_parfor=0;
-                tmt = toc;
-                [temp,Activity_inducing,Innovation, param] = MyTemporal_pfm(TC_IN, param);
-                fprintf('PFM completed in %.5f\n', toc-tmt);
-                if (k==param.Nit)
-                    param.Activity_inducing=Activity_inducing;
-                    param.Innovation=Innovation;
-                end
-            else
-                if (param.use_cuda==0)
-                    fprintf('Launching MyTemporal with Total Activation\n');
-                    tmt = toc;
-                    [temp, param] = MyTemporal_conv(TC_IN, param);
-                    fprintf('MyTemporal_conv completed in %.5f\n', toc-tmt);
-                else
-                    fprintf('Launching MyTemporal_MEX with Total Activation\n');
-                    tmt = toc;
-                    f = parfeval(@MyTemporal_MEX, 2, TC_IN,     ...
-                                 param.f_Analyze.num,           ...
-                                 length(param.f_Analyze.den),   ...
-                                 param.f_Analyze.den{1},        ...
-                                 param.f_Analyze.den{2},        ...
-                                 param.LambdaTempCoef,          ...
-                                 param.MaxEig,                  ...
-                                 param.COST_SAVE,               ...
-                                 param.NitTemp,                 ...
-                                 noiseFin);
-                end 
+        % Use synthesis-based temporal regularization with Paradigm Free Mapping (PFM) if
+        % param.use_pfm==1, otherwise use the temporal regularization in Total Activation
+        if (param.use_pfm==1)
+            fprintf('Launching MyTemporal with Paradigm Free Mapping\n');
+            param.use_parfor=0;
+            tmt = toc;
+            [temp,Activity_inducing,Innovation, param] = MyTemporal_pfm(TC_IN, param);
+            fprintf('PFM completed in %.5f\n', toc-tmt);
+            if (k==param.Nit)
+                param.Activity_inducing=Activity_inducing;
+                param.Innovation=Innovation;
             end
-            
-            %fprintf('Temporal \n');
-            %xT = xT + (temp - TC_OUT); %update temporal, stepsize=1; xT = xT + stepsize*(temp - TC_OUT);
-            
+        else
+            if (param.use_cuda==0)
+                fprintf('Launching MyTemporal with Total Activation\n');
+                tmt = toc;
+                [temp, param] = MyTemporal_conv(TC_IN, param);
+                fprintf('MyTemporal_conv completed in %.5f\n', toc-tmt);
+            else
+                fprintf('Launching MyTemporal_MEX with Total Activation\n');
+                tmt = toc;
+                f = parfeval(@MyTemporal_MEX, 2, TC_IN,     ...
+                                param.f_Analyze.num,           ...
+                                length(param.f_Analyze.den),   ...
+                                param.f_Analyze.den{1},        ...
+                                param.f_Analyze.den{2},        ...
+                                param.LambdaTempCoef,          ...
+                                param.MaxEig,                  ...
+                                param.COST_SAVE,               ...
+                                param.NitTemp,                 ...
+                                noiseFin);
+            end
+        end
 
+        %fprintf('Temporal \n');
+        %xT = xT + (temp - TC_OUT); %update temporal, stepsize=1; xT = xT + stepsize*(temp - TC_OUT);
 
         % 2. SPATIAL REGULARIZATION
 
@@ -147,25 +138,22 @@ function [TC_OUT,param] = RunTotalActivation(TCN,param)
         % with a temporal regularization step (no spatial
         % regularization done at k=5)
 
-
-
-
        if(k<param.Nit)
-                fprintf('Launching Spatial regularization\n');
-                tms = toc;
-                % calculates for the whole volume
-                temp2 = TA_Spatial_Graph(TC_OUT-xS+TCN,param); % calculates for the whole volume
-                fprintf('TA_Spatial_Graph completed in %.5f sec\n', toc-tms);
-                xS = xS+(temp2-TC_OUT);
-            end
+            fprintf('Launching Spatial regularization\n');
+            tms = toc;
+            % calculates for the whole volume
+            temp2 = TA_Spatial_Graph(TC_OUT-xS+TCN,param); % calculates for the whole volume
+            fprintf('TA_Spatial_Graph completed in %.5f sec\n', toc-tms);
+            xS = xS+(temp2-TC_OUT);
+        end
 
-            % EO: Wait for parallel execution of MyTemporal
-            %     /!\ Update noiseFin with noiseFinOut!
-            if (param.use_cuda==1)
-                [temp, noiseFin] = fetchOutputs(f);
-                fprintf('MyTemporal_MEX completed in %.5f\n', toc-tmt);
-                %noiseFin = noiseFinOut
-            end
+        % EO: Wait for parallel execution of MyTemporal
+        %     /!\ Update noiseFin with noiseFinOut!
+        if (param.use_cuda==1)
+            [temp, noiseFin] = fetchOutputs(f);
+            fprintf('MyTemporal_MEX completed in %.5f\n', toc-tmt);
+            %noiseFin = noiseFinOut
+        end
 
 
         % 3. WEIGHTED AVERAGE OF THE SOLUTIONS
