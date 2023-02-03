@@ -41,99 +41,77 @@ function [TC_OUT,param] = MyTemporal(TCN,param)
 	%        parfor = 0 to default implementation
 	%----------------------------------------------------
 
-	if(isempty(gcp('nocreate')) && param.use_parfor)
-	    parpool(24)
+	if(isempty(gcp('nocreate')) && param.parfor_w >1)
+	    parpool(param.parfor_w)
 	end
 
 	Nbr = param.NbrVoxels;
 
-        if (param.use_parfor==1)
 	  
-	  LambdaTemp    = zeros(param.NbrVoxels,1);
-          LambdaTempFin = zeros(param.NbrVoxels,1);
+    LambdaTemp    = zeros(param.NbrVoxels,1);
+    LambdaTempFin = zeros(param.NbrVoxels,1);
 
-	  %ticBytes(gcp);
+    %ticBytes(gcp);
 
-	  parfor i=1:Nbr
+    parfor (i=1:Nbr,param.parfor_w)
 
-            paramOUT2 = zeros(2,1);
-            TC_OUT2   = zeros(param.Dimension(4),1);
+        paramOUT2 = zeros(2,1);
+        TC_OUT2   = zeros(param.Dimension(4),1);
 
 
-            coef=cconv(TCN(:,i),param.daub);
-            
+        coef=cconv(TCN(:,i),param.daub);
+        
 
-            LambdaTemp(i) = mad(coef,1)*param.LambdaTempCoef;
+        LambdaTemp(i) = mad(coef,1)*param.LambdaTempCoef;
 
-            param2 = struct;
-            param2.f_Analyze     = param.f_Analyze;
-            param2.MaxEig        = param.MaxEig;
-            param2.Dimension     = param.Dimension;
-            param2.NitTemp       = param.NitTemp;
-            param2.VxlInd        = i;
-            param2.LambdaTemp    = LambdaTemp(i);
-            param2.COST_SAVE     = param.COST_SAVE;
+        param2 = struct;
+        param2.f_Analyze     = param.f_Analyze;
+        param2.MaxEig        = param.MaxEig;
+        param2.Dimension     = param.Dimension;
+        param2.NitTemp       = param.NitTemp;
+        param2.VxlInd        = i;
+        param2.LambdaTemp    = LambdaTemp(i);
+        param2.COST_SAVE     = param.COST_SAVE;
 
-	    lambda =  LambdaTemp(i);
-            if (isfield(param,'NoiseEstimateFin') && length(param.NoiseEstimateFin) >= i) 
-		lambda = param.NoiseEstimateFin(i);
-            end
-
-            Temporal_TA_MEX(TCN(:,i),                    ...
-			    param.f_Analyze.num,         ...
-			    LambdaTemp(i),               ...
-			    param.MaxEig,                ...
-			    int32(param.Dimension(4)),   ...
-			    int32(param.NitTemp),        ...
-			    length(param.f_Analyze.den), ...
-			    param.f_Analyze.den{1},      ...
-			    param.f_Analyze.den{2},      ...
-			    lambda,                      ...
-			    param.COST_SAVE,             ...
-			    TC_OUT2,                     ...
-			    paramOUT2);
-
-            LambdaTempFin(i)    = paramOUT2(1);
-            NoiseEstimateFin(i) = paramOUT2(2);
-            TC_OUT(:,i) = TC_OUT2;
-
-            if (param2.COST_SAVE)
-               costtemp(:,i) = paramOUT2.CostTemp;
-            end            
-         end
-
-         %tocBytes(gcp)
-	 
-         param.LambdaTemp       = LambdaTemp;
-         param.LambdaTempFin    = LambdaTempFin;
-         param.NoiseEstimateFin = NoiseEstimateFin;
-
-       else
-
-         for i=1:param.NbrVoxels,
-            
-            [coef,  len]  = wavedec(TCN(:,i),1,'db3');
-            coef(1:len(1)) = [];
-
-            param.LambdaTemp(i) = mad(coef,1)*param.LambdaTempCoef;
-            param.VxlInd        = i;
-
-            [TC_OUT(:,i),paramOUT] = TA_Temporal(TCN(:,i),param);
-
-            param.LambdaTempFin(i)    = paramOUT.LambdasTempFin;
-            param.NoiseEstimateFin(i) = paramOUT.NoiseEstimateFin;
-
-            if (param.COST_SAVE)
-                costtemp(:,i) = paramOUT.CostTemp;
-            end
+        lambda =  LambdaTemp(i);
+        if (isfield(param,'NoiseEstimateFin') && length(param.NoiseEstimateFin) >= i) 
+            lambda = param.NoiseEstimateFin(i);
         end
 
-        if (param.COST_SAVE)
-            param.cost_TEMP = [param.cost_TEMP; costtemp];
-        end
-      end
+        Temporal_TA_MEX(TCN(:,i),                    ...
+            param.f_Analyze.num,         ...
+            LambdaTemp(i),               ...
+            param.MaxEig,                ...
+            int32(param.Dimension(4)),   ...
+            int32(param.NitTemp),        ...
+            length(param.f_Analyze.den), ...
+            param.f_Analyze.den{1},      ...
+            param.f_Analyze.den{2},      ...
+            lambda,                      ...
+            param.COST_SAVE,             ...
+            TC_OUT2,                     ...
+            paramOUT2);
 
+        LambdaTempFin(i)    = paramOUT2(1);
+        NoiseEstimateFin(i) = paramOUT2(2);
+        TC_OUT(:,i) = TC_OUT2;
+
+        if (param2.COST_SAVE)
+            costtemp(:,i) = paramOUT2.CostTemp;
+        end            
     end
+
+    %tocBytes(gcp)
+
+    param.LambdaTemp       = LambdaTemp;
+    param.LambdaTempFin    = LambdaTempFin;
+    param.NoiseEstimateFin = NoiseEstimateFin;
+
+    if (param.COST_SAVE)
+        param.cost_TEMP = [param.cost_TEMP; costtemp];
+    end
+
+end
 
 
 
