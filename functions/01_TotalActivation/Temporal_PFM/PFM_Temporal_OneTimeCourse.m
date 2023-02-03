@@ -13,10 +13,9 @@
 % - ParametersOut: structure containing the parameters of the algorithm
 %
 % Implemented by Eneko Uruñuela, 13.12.2022
-function [Activity_related,Activity_inducing,Innovation,ParametersOut] = TA_Temporal_OneTimeCourse(y,idx_vox,ParametersIn)
+function [Activity_related,Activity_inducing,Innovation,NoiseEstimateFin,LambdasTempFin] = TA_Temporal_OneTimeCourse(y,idx_vox,ParametersIn)
 
     % The necessary HRF matrices are computed
-    ParametersOut = ParametersIn;
     X_tilde = ParametersIn.HRF;
     X_tilde_trans = ParametersIn.X_tilde_trans;
     X_tilde_tt = ParametersIn.X_tilde_tt;
@@ -138,8 +137,8 @@ function [Activity_related,Activity_inducing,Innovation,ParametersOut] = TA_Temp
     % Stores, for the considered voxel, the final noise estimate that was made,
     % and the final related regularisation parameter, so that if we re-enter
     % Temporal_TA, they are directly used as initial estimate
-    ParametersOut.NoiseEstimateFin = nv(end);
-    ParametersOut.LambdasTempFin = Lambda(end);
+    NoiseEstimateFin = nv(end);
+    LambdasTempFin = Lambda(end);
 
 end
 
