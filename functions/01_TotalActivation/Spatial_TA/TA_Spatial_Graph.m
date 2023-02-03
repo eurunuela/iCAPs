@@ -37,19 +37,15 @@ function x_out = TA_Spatial_Graph(y,param)
 
 
 x_out = zeros(size(y)); % out
-if (param.use_parfor==1)
-    if(isempty(gcp('nocreate')) && param.use_parfor)
+if (param.parfor_w>=1)
+    if(isempty(gcp('nocreate')))
 	    parpool(24)
 	else
         p=gcp;
         fprintf('There are %d workers in pool.\n', p.NumWorkers);
     end
-    parfor t=1:param.Dimension(4)
-        x_out(t,:) =MyProx_graph(y(t,:),param);
-    end
-else
-    for t=1:param.Dimension(4)
-        x_out(t,:) =MyProx_graph(y(t,:),param);
-    end
+end
+parfor (t=1:param.Dimension(4),param.parfor_w)
+    x_out(t,:) =MyProx_graph(y(t,:),param);
 end
 end
