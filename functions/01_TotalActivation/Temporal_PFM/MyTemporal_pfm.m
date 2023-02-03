@@ -28,6 +28,8 @@ function [Activity_related,Activity_inducing,innovation, paramOUT] = MyTemporal_
     Activity_related = zeros(param.Dimension(4),param.NbrVoxels);
     Activity_inducing = zeros(param.Dimension(4),param.NbrVoxels);
     innovation = zeros(param.Dimension(4),param.NbrVoxels);
+    NoiseEstimateFin = zeros(1,param.NbrVoxels);
+    LambdasTempFin = zeros(1,param.NbrVoxels);
     % LambdaTemp contains the values of regularisation parameters for each
     % voxel; also set to zero for now
     param.LambdaTemp = zeros(param.NbrVoxels,1);
@@ -42,12 +44,15 @@ function [Activity_related,Activity_inducing,innovation, paramOUT] = MyTemporal_
     param.c_ist = 1/abs(eigs(param.X_tilde_tt,1));
 
     % We loop over all voxels
-    for i = 1:param.NbrVoxels
-
+    if(isempty(gcp('nocreate')) && param.parfor_w>1)
+	    parpool(param.parfor_w);
+	end
+    parfor (i = 1:param.NbrVoxels, param.parfor_w)
+        param_parfor=param;
         % If LambdaPFM is "mad", then we use the median absolute deviation
         % to estimate the noise level
         
-        if strcmp(param.LambdaPFM,'mad')
+        if strcmp(param_parfor.LambdaPFM,'mad')
 
             % a. Wavelet decomposition of the time course of the voxel
             % of interest
@@ -67,21 +72,24 @@ function [Activity_related,Activity_inducing,innovation, paramOUT] = MyTemporal_
             % robust estimate of noise."
             % This is thus going to be our estimate of the noise level
             % for the considered voxel time course
-            param.LambdaTemp(i) = mad(coef,1)*param.LambdaTempCoef;
+            param_parfor.LambdaTemp(i) = mad(coef,1)*param_parfor.LambdaTempCoef;
 
              % Now that we have estimated our initial lambda 
             % (regularisation parameter), Temporal_TA performs the 
             % computations themselves for the considered time course
             % TCN(i,:) of voxel i
 
-            [Activity_related(:,i),Activity_inducing(:,i),innovation(:,i),paramOUT] = PFM_Temporal_OneTimeCourse(TCN(:,i),i,param);
+            [Activity_related(:,i),Activity_inducing(:,i),innovation(:,i),NoiseEstimateFin(i),LambdasTempFin(i)] = PFM_Temporal_OneTimeCourse(TCN(:,i),i,param_parfor);
         
         % If LambdaPFM is "aic" or "bic", use PFM with LARS
-        else strcmp(param.LambdaPFM,'aic') || strcmp(param.LambdaPFM,'bic')
+        else strcmp(param_parfor.LambdaPFM,'aic') || strcmp(param_parfor.LambdaPFM,'bic')
             % Error message saying that this is not implemented yet
             error('PFM with LARS is not implemented yet')
         end
-
+        
 
     end
+    param.NoiseEstimateFin= NoiseEstimateFin;
+    param.LambdasTempFin= LambdasTempFin;
+    paramOUT=param;
 end
