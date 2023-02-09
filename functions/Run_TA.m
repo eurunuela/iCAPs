@@ -180,6 +180,7 @@ function [] = Run_TA(param)
             if param.doDetrend || param.doNormalize
                 % Detrended time courses (n_vox x n_TP)
                 [TC,STD_MAP] = DetrendTimeCourses(TC,param,fid);
+                save4Dnii(resultsPath,'inputData','STD_MAP',STD_MAP,param.fHeader.fname,param.mask,param.Dimension);
             end
             
             % Update time-course length after interpolation
@@ -191,7 +192,6 @@ function [] = Run_TA(param)
             % saving preprocessed input data as 4D nifti file
             WriteInformation(fid,'Saving preprocessed fMRI 4D input (TC)...');
             save4Dnii(resultsPath,'inputData','TC',TC,param.fHeader.fname,param.mask,param.Dimension);
-            save4Dnii(resultsPath,'inputData','STD_MAP',STD_MAP,param.fHeader.fname,param.mask,param.Dimension);
             
             
             % Total activation itself
