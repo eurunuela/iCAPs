@@ -138,7 +138,7 @@ function [TC_OUT,param] = RunTotalActivation(TCN,param)
         % with a temporal regularization step (no spatial
         % regularization done at k=5)
 
-       if(k<param.Nit)
+        if(k<param.Nit)
             fprintf('Launching Spatial regularization\n');
             tms = toc;
             % calculates for the whole volume

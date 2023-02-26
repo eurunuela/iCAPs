@@ -45,11 +45,19 @@ if (param.use_parfor==1)
         fprintf('There are %d workers in pool.\n', p.NumWorkers);
     end
     parfor t=1:param.Dimension(4)
-        x_out(t,:) =MyProx_graph(y(t,:),param);
+        if (param.use_pfm == 1)
+            x_out(t,:) =MyProx_graph_PFM(y(t,:),param);
+        else
+            x_out(t,:) =MyProx_graph(y(t,:),param);
+        end
     end
 else
     for t=1:param.Dimension(4)
-        x_out(t,:) =MyProx_graph(y(t,:),param);
+        if (param.use_pfm == 1)
+            x_out(t,:) =MyProx_graph_PFM(y(t,:),param);
+        else
+            x_out(t,:) =MyProx_graph(y(t,:),param);
+        end
     end
 end
 end
